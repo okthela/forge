@@ -50,7 +50,9 @@ proc install() =
                 continue
             echo fmt"Installing dependency: {i}"
             sleep(1)
-            discard execCmd(fmt"forge install {i}")
+            if execCmd(fmt"forge install {i}") != 0:
+                echo fmt"Error: Failed to install dependency {i}."
+                quit(1)
     else:
         echo "No dependencies found."
 
@@ -64,7 +66,9 @@ proc install() =
 
     echo SEPARATOR
 
-    discard execCmd(fmt"cd {TMP}/{PKG} && sh build.sh")
+    if execCmd(fmt"cd {TMP}/{PKG} && sh build.sh") != 0:
+        echo "Error: Build failed."
+        quit(1)
 
     echo SEPARATOR
     echo "Done, registering into the world set."

@@ -42,9 +42,9 @@ proc install() =
  
     discard execCmd(fmt"tar -xzvf {pkgsrc} -C {TMP}/{PKG}")
     echo "Source extracted."  
-    
-    if fileExists("{TMP}/{PKG}/depends"):
-        for i in readFile("{TMP}/{PKG}/depends").splitLines():
+
+    if fileExists(fmt"{TMP}/{PKG}/depends"):
+        for i in readFile(fmt"{TMP}/{PKG}/depends").splitLines():
             if fileExists(fmt"/var/forge/world/{i}"):
                 echo fmt"Dependency {i} is already installed, skipping."
                 continue

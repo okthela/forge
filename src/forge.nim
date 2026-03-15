@@ -43,7 +43,7 @@ proc install(name: string) =
     echo "Source extracted."
 
     if fileExists(fmt"{TMP}/{name}/depends"):
-        for dep in readFile(fmt"{TMP}/{name}/depends").splitLines():
+        for dep in lines(fmt"{TMP}/{name}/depends"):
             let i = dep.strip()
 
             if i.len == 0:
@@ -82,8 +82,7 @@ proc install(name: string) =
     echo fmt"{name} has been installed successfully."
 
 proc remove(name: string) =
-    let tbr = readFile(fmt"/var/forge/world/{name}_installed").splitLines()
-    for item in tbr:
+    for item in lines(fmt"/var/forge/world/{name}_installed"):
         if dirExists(item):
           removeDir(item)
         elif fileExists(item):

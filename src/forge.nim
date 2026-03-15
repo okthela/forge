@@ -81,11 +81,6 @@ proc install(name: string) =
     if execCmd(fmt"cd {TMP}/{name} && sh build.sh") != 0:
         echo "Error: Build failed."
         quit(1)
-    let dirs = "/bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/lib /usr/local/lib /etc /usr/share /usr/include"
-    let installLog = fmt"/var/forge/world/{name}_installed"
-
-    echo "tracking installed files.."
-    discard execCmd(fmt"find {dirs} -newer {timeMarker} ! -type d > {installLog}")
 
     echo SEPARATOR
     echo "Done, registering into the world set."

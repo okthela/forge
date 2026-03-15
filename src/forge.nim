@@ -8,15 +8,12 @@ if paramCount() == 0:
     echo """Usage: forge <operation> <package>
     Operations:
         install - Install a package
+        remove - Remove a package
     """
     quit(1)
 
 elif paramCount() == 1:
     echo "Error: Missing package name"
-    quit(1)
-
-elif paramCount() > 2:
-    echo "Error: Too many arguments"
     quit(1)
 
 let PARAMS = commandLineParams()

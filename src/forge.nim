@@ -4,13 +4,13 @@ if paramCount() == 0:
     echo """Usage: forge <operation> <package>
     Operations:
         install - Install a package
-    """    
+    """
     quit(1)
 
 elif paramCount() == 1:
     echo "Error: Missing package name"
     quit(1)
-    
+
 elif paramCount() > 2:
     echo "Error: Too many arguments"
     quit(1)
@@ -35,13 +35,13 @@ proc install() =
     let client = newHttpClient()
     client.downloadFile(URL, pkgsrc)
     echo fmt"Successfully downloaded {PKG} from {REPO}"
-    
+
     echo SEPARATOR
 
     echo "Extracting source.\n"
- 
+
     discard execCmd(fmt"tar -xzvf {pkgsrc} -C {TMP}/{PKG}")
-    echo "Source extracted."  
+    echo "Source extracted."
 
     if fileExists(fmt"{TMP}/{PKG}/depends"):
         for dep in readFile(fmt"{TMP}/{PKG}/depends").splitLines():
@@ -54,7 +54,7 @@ proc install() =
                 echo fmt"Dependency {i} is already installed, skipping."
                 continue
             echo fmt"Installing dependency: {i}"
-            sleep(1)
+            sleep(1000)
             if execCmd(fmt"forge install {i}") != 0:
                 echo fmt"Error: Failed to install dependency {i}."
                 quit(1)
@@ -79,7 +79,7 @@ proc install() =
     echo "Done, registering into the world set."
     writeFile(fmt"/var/forge/world/{PKG}", "")
     echo fmt"{PKG} has been installed successfully."
-    
+
 proc remove() =
     let tbr = readFile(fmt"/var/forge/world/{PKG}_installed").splitLines()
     for item in tbr:
@@ -95,4 +95,3 @@ elif OP == "remove":
     remove()
 else:
     echo fmt"Error: Unknown operation '{OP}'"
-

@@ -24,9 +24,13 @@ proc programExit*[T](msg: T = "", code: int = QuitFailure) =
     quit(m, code)
 
 
-proc checkCanExecute*(): bool = 
-    if getuid() != 0: return false
-    if paramCount() == 0: return false
+proc checkCanExecute*(): bool =
+     if getuid() != 0: 
+        echo "Must be root."
+        return false
+     if paramCount() == 0: 
+        echo "No operation specified."
+        return false             
 
 
 template printUsage*() =

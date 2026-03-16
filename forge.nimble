@@ -1,9 +1,9 @@
-version       = "1.0.0"
+version       = "1.0.1"
 author        = "okthela"
 description   = "the package manager for ohlinux (fr this time)"
 license       = "BSD-3-Clause"
 srcDir        = "src"
-bin           = @["forge"]
+bin           = @["main"]
 
 requires "nim >= 2.0.8"
 requires "zippy >= 0.10.19"

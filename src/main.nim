@@ -99,16 +99,16 @@ proc install(name: string) =
 
     var logFile = open(installLog, fmWrite)
     try:
-      for dir in FIND_DIRS:
-          if dirExists(dir):
-              for path in walkDirRec(dir, yieldFilter={pcFile, pcLinkToFile}):
-                  try:
-                      if getLastModificationTime(path) > markerTime:
-                          logFile.writeLine(path)
-                  except OSError:
-                      discard
+        for dir in FIND_DIRS:
+            if dirExists(dir):
+                for path in walkDirRec(dir, yieldFilter={pcFile, pcLinkToFile}):
+                    try:
+                        if getLastModificationTime(path) > markerTime:
+                            logFile.writeLine(path)
+                    except OSError:
+                        discard
     finally:
-      logFile.close()
+        logFile.close()
 
     writeFile(fmt"/var/forge/world/{name}", "")
     consoleOkay(fmt"{name} has been installed successfully.")

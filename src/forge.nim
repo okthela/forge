@@ -1,4 +1,4 @@
-import os, osproc, strformat, httpclient, strutils, posix, re
+import os, osproc, strformat, httpclient, strutils, posix, re, times
 stdout.flushFile()
 
 if getuid() != 0:
@@ -42,6 +42,25 @@ proc validatePkgName(name: string): bool =
       return false
 
     return name.match(VALID_PKG_PATTERN)
+
+let lockPath = TMP / "forge.lock"
+
+proc acquireLock() =
+  createDir(TMP)
+  if fileExists(lockPath):
+    let age = getTime() - getLastModificationTime(lockPath)
+    if age.inHours < 1:
+      stderr.writeLine("Error: Another forge process is running (lockfile exists).")
+      stderr.writeLine("If this is stale, remove ", & lockPath)
+      quit(1)
+    else:
+      echo "Removing stale lockfile."
+      removeFile(lockPath)
+  writeFile(lockPath, $getCurrentProcessId())
+
+proc releaseLock() =
+  if fileExists(lockPath):
+    removeFile(lockPath)
 
 proc install(name: string) =
     echo "Downloading source."
@@ -114,12 +133,22 @@ proc remove(name: string) =
     removeFile(fmt"/var/forge/world/{name}_installed")
     removeFile(fmt"/var/forge/world/{name}")
 
-
-if OP == "install":
-  for pkg in PKGS:
-    install(pkg)
-elif OP == "remove":
-  for pkg in PKGS:
-    remove(pkg)
+case OP
+of "install":
+  acquireLock()
+  try:
+    for pkg in PKGS:
+      install(pkg)
+  finally:
+    releaseLock()
+of "remove":
+  acquireLock()
+  try:
+    for pkg in PKGS:
+      remove(pkg)
+  finally:
+      releaseLock()
 else:
-    echo fmt"Error: Unknown operation '{OP}'"
+  echo fmt"Error: Unknown operation '{OP}'"
+  printUsage()
+  quit(1)

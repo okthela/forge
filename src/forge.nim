@@ -7,6 +7,7 @@ if getuid() != 0:
 const
   TMP = "/tmp/forge"
   SEPARATOR = "----------------------------------------"
+  WORLD_DIR = "/var/forge/world/
 
 let VALID_PKG_PATTERN = re"^[a-zA-Z0-9][a-zA0-9._-]*$"
 

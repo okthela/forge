@@ -33,7 +33,7 @@ let
 
 
 if OPERATION notin ["install", "remove", "list", "info"]:
-    programExit("Operation not supported: {OPERATION}")
+    programExit(fmt"Operation not supported: {OPERATION}")
     printUsage()
 
 

@@ -1,9 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (C) 2025-2026 Taylor (Wakana Kisarazu)
+# Copyright (C) 2025-2026 Taylor (Wakana Kisarazu), okla14
 
-# REMOVE WHEN SEEN - But, when others make changes to
-# forge, add your ID/Name/Email/Discord whatever to
-# the copyright notice to indicate your changes
 import std/[posix, os, osproc, strformat, strutils, httpclient, re, times]
 import zippy/tarballs
 import regex

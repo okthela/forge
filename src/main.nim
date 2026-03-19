@@ -38,6 +38,49 @@ let FIND_DIRS = ["/bin", "/sbin", "/usr/bin", "/usr/sbin", "/usr/local/bin", "/u
 
 createDir(WORLD_DIR)
 
+proc fabric(path: string) =
+    if not fileExists(path):
+        consoleFail(fmt"File not found: {path}")
+        return
+    let fileName = extractFilename(path)
+    let name = fileName.replace(".tar.gz", "").replace(".tgz", "")
+    let workdir = TEMP_DIR / name
+    consoleInfo(fmt"Building local package: {name}")
+    if dirExists(workdir):
+        removeDir(workdir)
+    try:
+        extractAll(path, workdir)
+        consoleOkay("Extract sucess.")
+    except Exception as e:
+        consoleFail(fmt"Error extracting the tarball: {e.msg}")
+        return
+    consoleDimSep()
+    consoleInfo("Building local package.")
+    let buildsh = workdir / "build.sh"
+    if not fileExists(buildsh):
+        consoleFail("Build script not found in local package")
+        return
+    let markerTime = getTime()
+    sleep(1000)
+    if execCmd(fmt"cd {workdir} && sh build.sh") != 0:
+        consoleFail("Local build failed.")
+        return
+    let installLog = fmt"/var/forge/world/{name}_installed"
+    consoleInfo("Tracking installed files...")
+    var logFile = open(installLog, fmWrite)
+    try:
+        for dir in FIND_DIRS:
+            if dirExists(dir):
+                for path in walkDirRec(dir, yieldFilter={pcFile, pcLinkToFile}):
+                    try:
+                        if getLastModificationTime(path) > markerTime:
+                            logFile.writeLine(path)
+                    except OSError:
+                        discard
+    finally:
+        logFile.close()
+
+
 proc install(name: string) =
     consoleInfo(fmt"Downloading source for {name}")
     consoleDebug(fmt"Connecting to {REPO_DIR}...")
@@ -87,8 +130,10 @@ proc install(name: string) =
         if fileExists(buildPath):
             consoleInfo(fmt"Editing {buildPath} with {editor}..")
             discard execCmd(fmt"{editor} {buildPath}")
-        else:
-            consoleWarn("build.sh script not found, are you sure this is a forge package?")
+        else: 
+            consoleFail("build.sh script not found, are you sure this is a forge package?")
+            quit(1)
+
     consoleInfo("Building package.")
     consoleDimSep()
 
@@ -176,6 +221,7 @@ proc remove(name: string) =
     removeFile(fmt"/var/forge/world/{name}_installed")
     removeFile(fmt"/var/forge/world/{name}")
     consoleOkay(fmt"{name} has been removed.")
+
 proc loadBuildConf() =
     let confPath = "/etc/forge/build.conf"
     if fileExists(confPath) :
@@ -189,32 +235,7 @@ proc loadBuildConf() =
                 let val = parts[1].strip().strip(chars = {'"', '\''})
                 putEnv(key, val)
                 consoleDebug(fmt" -> {key} set to: {val}")
-proc fabric(path: string) =
-    if not fileExists(path):
-        consoleFail(fmt"File not found: {path}")
-        return
-    let fileName = extractFilename(path)
-    let name = fileName.replace(".tar.gz", "").replace(".tgz", "")
-    let workdir = TEMP_DIR / name
-    consoleInfo(fmt"Building local package: {name}")
-    if dirExists(workdir):
-        removeDir(workdir)
-    try:
-        extractAll(path, workdir)
-        consoleOkay("Extract sucess.")
-    except Exception as e:
-        consoleFail(fmt"Error extracting the tarball: {e.msg}")
-        return
-    consoleDimSep()
-    consoleInfo("Building local package.")
-    let markerTime = getTime()
-    let buildsh = workdir / "build.sh"
-    if not fileExists(buildsh):
-        consoleFail("Build script not found in local package")
-        return
-    if execCmd(fmt"cd {workdir} && sh build.sh") != 0:
-        consoleFail("Local build failed.")
-        return
+
 case OPERATION
 of "install":
   loadBuildConf()
